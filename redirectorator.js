@@ -5,7 +5,7 @@ exports.logger = console.log;
 exports.server = http.createServer(function(req, res){
   var host = req.headers.host;
   if(host && host != 'www.redirectorator.com'){
-    module.exports.doRedirect(host, url, res);
+    module.exports.doRedirect(host, req.url, res);
   }else{
     res.writeHead(400, {'Content-Type' : 'text/plain'});
     res.end('Error: this service can only handle requests with a host header');
@@ -32,10 +32,12 @@ exports.doRedirect = function(host, url, res, cb){
 exports.resolveRedirect = function(host, cb){
   dns.resolveTxt(host, function(err, addresses){
     var resolved, i;
-    for(i = 0; i < addresses.length; i++){
-      resolved = module.exports.extractTxtHost(addresses[i]);
-      if(resolved){
-        break;
+    if(addresses){
+      for(i = 0; i < addresses.length; i++){
+        resolved = module.exports.extractTxtHost(addresses[i]);
+        if(resolved){
+          break;
+        }
       }
     }
 
@@ -49,3 +51,9 @@ exports.extractTxtHost = function(raw){
     return parts[1];
   }
 };
+
+//start server if port specified
+var port = parseInt(process.argv[process.argv.length - 1]);
+if(!isNaN(port)){
+  module.exports.server.listen(port);
+}
