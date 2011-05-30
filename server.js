@@ -1,0 +1,1 @@
+redirectorator.js
